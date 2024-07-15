@@ -1,0 +1,20 @@
+{
+  "name": "maddlen/module-zermatt-form",
+  "version": "1.0.0",
+  "description": "A precognitive form implementation for Zermatt.",
+  "type": "magento2-module",
+  "require": {
+    "magento/framework": "*"
+  },
+  "license": [
+    "Massachusetts Institute of Technology License (MITL)"
+  ],
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Maddlen\\ZermattForm\\": ""
+    }
+  }
+}
