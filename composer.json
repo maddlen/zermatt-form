@@ -6,9 +6,7 @@
   "require": {
     "magento/framework": "*"
   },
-  "license": [
-    "Massachusetts Institute of Technology License (MITL)"
-  ],
+  "license": "MIT",
   "autoload": {
     "files": [
       "registration.php"
