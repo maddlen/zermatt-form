@@ -1,6 +1,6 @@
 {
   "modules": {
-    "form": "./modules/form"
+    "Zermatt_Form": "./modules/form"
   },
   "rewrites": {}
 }

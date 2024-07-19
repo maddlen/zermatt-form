@@ -2,7 +2,7 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="zermatt.variables">
-            <block name="zermattform.keyurl" template="Maddlen_ZermattForm::variables/form-key.phtml"/>
+            <block name="zermattform.keyurl" template="Maddlen_ZermattForm::variables/form-key-url.phtml"/>
         </referenceContainer>
     </body>
 </page>
