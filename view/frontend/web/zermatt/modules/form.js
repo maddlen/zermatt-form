@@ -11,7 +11,7 @@ export default {
         if (Zermatt.Variables.formKey) {
             this.buildForm()
         } else {
-            Zermatt.Event.on('zermatt:form:key:init', this.buildForm.bind(this))
+            Zermatt.Event.once('zermatt:form:key:init', this.buildForm.bind(this))
         }
     },
     buildForm () {
