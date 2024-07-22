@@ -4,22 +4,29 @@
 export default {
     success: false,
     submitted: false,
+    domForm: null,
     form: null,
     formData: {},
     init () {
         if (Zermatt.Variables.formKey) {
             this.buildForm()
         } else {
-            Zermatt.Event.listen('zermatt:form:key:init', this.buildForm.bind(this))
+            Zermatt.Event.on('zermatt:form:key:init', this.buildForm.bind(this))
         }
     },
     buildForm () {
-        const form = this.$el.querySelector('form')
+        this.domForm = this.$el.querySelector('form')
         this.formData.form_key = Zermatt.Variables.formKey
-        this.form = this.$form('post', form.getAttribute('action'), this.formData)
+        this.form = this.$form('post', this.domForm.getAttribute('action'), this.formData)
     },
-    onSuccess (response) {
-        window.location.href = response.data.redirect
+    onSuccess () {
+        return false
+    },
+    doOnSuccess (response) {
+        if (!this.onSuccess()) {
+            window.location.href = response.data.redirect
+        }
+        this.onSuccess()
     },
     validate (field) {
         this.form.errors = {}
@@ -32,12 +39,12 @@ export default {
                 this.form.reset()
                 this.success = true
                 this.submitted = false
-                this.onSuccess(response)
+                this.doOnSuccess(response)
                 setTimeout(() => {
                     this.success = false
                 }, 4500)
             })
-            .then(() => this.form.scrollIntoView())
+            .then(() => this.domForm.scrollIntoView())
             .catch(error => {
                 console.log('Form has errors and was not submitted.')
             })

@@ -7,6 +7,7 @@ namespace Maddlen\ZermattForm\FormRules;
 
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\Phrase;
 use Magento\Framework\UrlInterface;
 
 abstract class FormRulesAbstract implements FormRulesActionInterface
@@ -23,14 +24,16 @@ abstract class FormRulesAbstract implements FormRulesActionInterface
     public function execute()
     {
         if ($this->validate->pass()) {
-            $this->messageManager->addSuccessMessage(__('Form is valid.'));
-        } else {
-            $this->messageManager->addErrorMessage(__('Form is invalid.'));
+            if ($this->getSuccessMessage()) {
+                $this->messageManager->addSuccessMessage($this->getSuccessMessage());
+            }
         }
 
         return $this->resultFactory->create(ResultFactory::TYPE_JSON)
             ->setData(['redirect' => $this->redirectUrl()]);
     }
+
+    abstract public function getSuccessMessage(): ?Phrase;
 
     abstract public function redirectUrl(): string;
 

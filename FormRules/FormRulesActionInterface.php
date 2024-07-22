@@ -6,6 +6,7 @@
 namespace Maddlen\ZermattForm\FormRules;
 
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\Phrase;
 use Magento\Framework\Validator\ValidatorInterface;
 
 interface FormRulesActionInterface extends HttpPostActionInterface
@@ -21,4 +22,6 @@ interface FormRulesActionInterface extends HttpPostActionInterface
     public function rules(): array;
 
     public function redirectUrl(): string;
+
+    public function getSuccessMessage(): ?Phrase;
 }
