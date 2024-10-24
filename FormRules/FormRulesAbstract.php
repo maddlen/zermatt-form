@@ -5,6 +5,7 @@
 
 namespace Maddlen\ZermattForm\FormRules;
 
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Phrase;
@@ -13,12 +14,12 @@ use Magento\Framework\UrlInterface;
 abstract class FormRulesAbstract implements FormRulesActionInterface
 {
     public function __construct(
-        protected readonly ResultFactory    $resultFactory,
-        protected readonly Validate         $validate,
+        protected readonly RequestInterface $request,
+        protected readonly ResultFactory $resultFactory,
+        protected readonly Validate $validate,
         protected readonly ManagerInterface $messageManager,
-        protected readonly UrlInterface     $url
-    )
-    {
+        protected readonly UrlInterface $url
+    ) {
     }
 
     public function execute()
@@ -29,8 +30,14 @@ abstract class FormRulesAbstract implements FormRulesActionInterface
             }
         }
 
-        return $this->resultFactory->create(ResultFactory::TYPE_JSON)
-            ->setData(['redirect' => $this->redirectUrl()]);
+        return $this->request->getParam('must_redirect') ?
+            $this->resultFactory->create(ResultFactory::TYPE_RAW)->setHeader(
+                'x-zermatt-redirect',
+                $this->redirectUrl()
+            )
+            : $this->resultFactory->create(ResultFactory::TYPE_JSON)->setData(
+                ['redirect' => $this->redirectUrl()]
+            );
     }
 
     abstract public function getSuccessMessage(): ?Phrase;
