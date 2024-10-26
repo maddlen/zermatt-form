@@ -12,14 +12,15 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Data\Form\FormKey;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 {
     public function __construct(
         protected ResultFactory $resultFactory,
-        protected FormKey       $formKey
-    )
-    {
+        protected FormKey $formKey,
+        protected StoreManagerInterface $storeManager
+    ) {
     }
 
     public function execute(): ResultInterface
@@ -31,11 +32,26 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 
     public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
     {
-        return null;
+        $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+        $result->setContents('Unauthorized');
+        $result->setHttpResponseCode(403);
+        return new InvalidRequestException($result);
+    }
+
+    protected function validateOrigin(RequestInterface $request): bool
+    {
+        $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+        $baseUrl = $this->storeManager->getStore()->getBaseUrl();
+        if (strpos($referrer, $baseUrl) === false) {
+            return false;
+        }
+        return true;
     }
 
     public function validateForCsrf(RequestInterface $request): ?bool
     {
-        return true; // This route requests the form key... so we must leave it opened.
+        // This route requests the form key... so we must leave it opened.
+        // But we still want to enforce same origin policy.
+        return $this->validateOrigin($request);
     }
 }
