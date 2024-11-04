@@ -40,9 +40,9 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 
     protected function validateOrigin(RequestInterface $request): bool
     {
-        $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+        $domain = parse_url($_SERVER['HTTP_REFERER'] ?? '', PHP_URL_HOST) ?: '';
         $baseUrl = $this->storeManager->getStore()->getBaseUrl();
-        if (strpos($referrer, $baseUrl) === false) {
+        if (strpos($baseUrl, $domain) === false) {
             return false;
         }
         return true;
