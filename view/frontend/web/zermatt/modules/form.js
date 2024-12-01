@@ -1,12 +1,8 @@
 /*
  * @author Hervé Guétin <www.linkedin.com/in/herveguetin>
  */
-/**
- * @author Hervé Guétin <www.linkedin.com/in/herveguetin>
- */
 export default {
   success: false,
-  submitted: false,
   domForm: null,
   form: null,
   formData: {},
@@ -37,13 +33,11 @@ export default {
     this.form.validate(field);
   },
   submit() {
-    this.submitted = true;
     this.form
       .submit()
       .then((response) => {
         this.form.reset();
         this.success = true;
-        this.submitted = false;
         this.doOnSuccess(response);
         setTimeout(() => {
           this.success = false;
