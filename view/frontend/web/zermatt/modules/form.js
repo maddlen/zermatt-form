@@ -65,9 +65,6 @@ export default {
                     this.success = false
                 }, 4500)
             })
-            .then(() => {
-                this.domForm.scrollIntoView()
-            })
             .catch((error) => {
                 console.error(error)
                 this.submitting = false
