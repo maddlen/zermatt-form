@@ -25,6 +25,7 @@ export default {
     },
     whenSubmitted (response) {
         if (!this.onSubmitted()) {
+            this.submitting = true
             window.location.href = response.headers['x-zermatt-redirect']
         }
         if (response.data.success) {
