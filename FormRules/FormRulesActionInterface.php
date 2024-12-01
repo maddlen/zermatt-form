@@ -24,4 +24,6 @@ interface FormRulesActionInterface extends HttpPostActionInterface
     public function redirectUrl(): string;
 
     public function getSuccessMessage(): ?Phrase;
+
+    public function submitForm(): bool;
 }

@@ -15,18 +15,25 @@ abstract class FormRulesAbstract implements FormRulesActionInterface
 {
     public function __construct(
         protected readonly RequestInterface $request,
-        protected readonly ResultFactory $resultFactory,
-        protected readonly Validate $validate,
+        protected readonly ResultFactory    $resultFactory,
+        protected readonly Validate         $validate,
         protected readonly ManagerInterface $messageManager,
-        protected readonly UrlInterface $url
-    ) {
+        protected readonly UrlInterface     $url
+    )
+    {
     }
 
     public function execute()
     {
+        $isSuccess = false;
         if ($this->validate->pass()) {
-            if ($this->getSuccessMessage()) {
-                $this->messageManager->addSuccessMessage($this->getSuccessMessage());
+            try {
+                if ($this->isSubmitted()) {
+                    $this->messageManager->addSuccessMessage($this->getSuccessMessage());
+                    $isSuccess = true;
+                }
+            } catch (\Exception $e) {
+                $this->messageManager->addErrorMessage($e->getMessage());
             }
         }
 
@@ -36,9 +43,22 @@ abstract class FormRulesAbstract implements FormRulesActionInterface
                 $this->redirectUrl()
             )
             : $this->resultFactory->create(ResultFactory::TYPE_JSON)->setData(
-                ['redirect' => $this->redirectUrl()]
+                [
+                    'success' => $isSuccess,
+                    'redirect' => $this->redirectUrl(),
+                    'messages' => array_map((fn($message) => $message->getText()), $this->messageManager->getMessages(true)->getItems())]
             );
     }
+
+    protected function isSubmitted(): bool
+    {
+        if ($this->request->getParam('must_submit')) {
+            return $this->submitForm();
+        }
+        return false;
+    }
+
+    abstract public function submitForm(): bool;
 
     abstract public function getSuccessMessage(): ?Phrase;
 

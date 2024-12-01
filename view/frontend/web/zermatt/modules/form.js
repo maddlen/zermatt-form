@@ -2,10 +2,11 @@
  * @author Hervé Guétin <www.linkedin.com/in/herveguetin>
  */
 export default {
-    success: false,
     domForm: null,
     form: null,
     formData: {},
+    validating: false,
+    submitting: false,
     init () {
         if (Zermatt.Variables.formKey) {
             this.buildForm()
@@ -13,39 +14,70 @@ export default {
             Zermatt.Event.once('zermatt:form:key:init', this.buildForm.bind(this))
         }
     },
-    buildForm () {
-        this.domForm = this.$el.querySelector('form')
+    buildForm (formData = null) {
+        this.domForm = this.$el.querySelector('form') || this.$el.closest('form')
         this.formData.form_key = Zermatt.Variables.formKey
-        this.formData.must_redirect = Boolean(!this.onSuccess())
-        this.form = this.$form('post', this.domForm.getAttribute('action'), this.formData)
+        this.formData.must_redirect = Boolean(!this.onSubmitted())
+        this.form = this.$form('post', this.domForm.getAttribute('action'), formData || this.formData)
     },
-    onSuccess () {
+    onSubmitted (payload = {}) {
         return false
     },
-    doOnSuccess (response) {
-        if (!this.onSuccess()) {
+    whenSubmitted (response) {
+        if (!this.onSubmitted()) {
             window.location.href = response.headers['x-zermatt-redirect']
         }
-        this.onSuccess()
+        if (response.data.success) {
+            this.domForm.reset()
+        }
+        this.onSubmitted({ response: response.data, form: this.form.data() })
     },
     validate (field) {
         this.form.errors = {}
         this.form.validate(field)
     },
-    submit () {
+    async validateForm () {
+        this.validating = true
+        const formData = this.form.data()
+        formData.must_submit = false
+        this.buildForm(formData)
+        try {
+            await this.form.submit()
+            this.validating = false
+            return true
+        } catch (error) {
+            console.log('Form has errors and was not submitted.')
+            this.validating = false
+            return false
+        }
+    },
+    async submitForm () {
+        this.submitting = true
+        const formData = this.form.data()
+        formData.must_submit = true
+        this.buildForm(formData)
         this.form
             .submit()
             .then((response) => {
-                this.form.reset()
-                this.success = true
-                this.doOnSuccess(response)
+                this.submitting = false
+                this.whenSubmitted(response)
                 setTimeout(() => {
                     this.success = false
                 }, 4500)
             })
-            .then(() => this.domForm.scrollIntoView())
+            .then(() => {
+                this.domForm.scrollIntoView()
+            })
             .catch((error) => {
+                console.error(error)
+                this.submitting = false
                 console.log('Form has errors and was not submitted.')
             })
+    },
+    async submit () {
+        const isValid = await this.validateForm()
+        if (isValid) {
+            await this.submitForm()
+        }
     }
 }
