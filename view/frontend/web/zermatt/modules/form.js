@@ -39,7 +39,7 @@ export default {
     },
     async validateForm () {
         this.validating = true
-        const formData = this.form.data()
+        const formData = Object.assign({}, this.formData, this.form.data())
         formData.must_submit = false
         this.buildForm(formData)
         try {
