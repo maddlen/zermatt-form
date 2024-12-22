@@ -15,18 +15,12 @@ export default {
         }
     },
     buildForm (formData = null) {
-        const formKey = this.getMagentoFormKey() || Zermatt.Variables.formKey
+        const formKey = Zermatt.Variables.formKey
         this.domForm = this.$el.querySelector('form') || this.$el.closest('form')
         this.formData.form_key = formKey
         if (formData) formData.form_key = formKey
         this.formData.must_redirect = Boolean(!this.onSubmitted())
         this.form = this.$form('post', this.domForm.getAttribute('action'), formData || this.formData)
-    },
-    getMagentoFormKey () {
-        return document.cookie
-            .split('; ')
-            .find((row) => row.startsWith('form_key='))
-            ?.split('=')[1]
     },
     onSubmitted (payload = {}) {
         return false
