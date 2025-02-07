@@ -1,35 +1,34 @@
 <?php
-/**
- * @author Hervé Guétin <www.linkedin.com/in/herveguetin>
- */
 
 namespace Maddlen\ZermattForm\FormRules;
 
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Message\ManagerInterface;
-use Magento\Framework\Phrase;
 use Magento\Framework\UrlInterface;
 
-abstract class FormRulesAbstract implements FormRulesActionInterface
+readonly class FormRulesService
 {
+    private FormRulesActionInterface $action;
+
     public function __construct(
-        protected readonly RequestInterface $request,
-        protected readonly ResultFactory    $resultFactory,
-        protected readonly Validate         $validate,
-        protected readonly ManagerInterface $messageManager,
-        protected readonly UrlInterface     $url
+        protected RequestInterface $request,
+        protected ResultFactory    $resultFactory,
+        protected Validate         $validate,
+        protected ManagerInterface $messageManager,
+        protected UrlInterface     $url
     )
     {
     }
 
-    public function execute()
+    public function execute(FormRulesActionInterface $action)
     {
+        $this->action = $action;
         $isSuccess = false;
         if ($this->validate->pass()) {
             try {
                 if ($this->isSubmitted()) {
-                    $this->messageManager->addSuccessMessage($this->getSuccessMessage());
+                    $this->messageManager->addSuccessMessage($action->getSuccessMessage());
                     $isSuccess = true;
                 }
             } catch (\Exception $e) {
@@ -40,29 +39,22 @@ abstract class FormRulesAbstract implements FormRulesActionInterface
         return $this->request->getParam('must_redirect') ?
             $this->resultFactory->create(ResultFactory::TYPE_RAW)->setHeader(
                 'x-zermatt-redirect',
-                $this->redirectUrl()
+                $action->redirectUrl()
             )
             : $this->resultFactory->create(ResultFactory::TYPE_JSON)->setData(
                 [
                     'success' => $isSuccess,
-                    'redirect' => $this->redirectUrl(),
-                    'messages' => array_map((fn($message) => $message->getText()), $this->messageManager->getMessages(true)->getItems())]
+                    'redirect' => $action->redirectUrl(),
+                    'messages' => array_map(fn($message) => $message->getText(), $this->messageManager->getMessages(true)->getItems())
+                ]
             );
     }
 
     protected function isSubmitted(): bool
     {
         if ($this->request->getParam('must_submit')) {
-            return $this->submitForm();
+            return $this->action->submitForm();
         }
         return false;
     }
-
-    abstract public function submitForm(): bool;
-
-    abstract public function getSuccessMessage(): ?Phrase;
-
-    abstract public function redirectUrl(): string;
-
-    abstract public function rules(): array;
 }
